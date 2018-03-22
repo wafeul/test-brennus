@@ -34,10 +34,10 @@ plot(res.pca, axes = c(1,3), habillage = 1, col.hab=c("green","red"),label = "no
 x11()
 plot(res.pca, axes = c(2,3), habillage = 1, col.hab=c("green","red"),label = "none")
 
-#barplot : rËgle de Kaiser : 2 voir 3 composantes. 70 -> 3 donc plutot 3
-#dimension 1 : trËs forte corr entre lineic weight et ca_p_std_per_km -> dans ttes les dims -> surapprentissage
-#dimension 2 : prix de la transaction : les gros clients achËtent quasi-toujours
-#dimension 3 : idem 2 mais sur les quantitÈs de materiel achetÈ
+#barplot : r√®gle de Kaiser : 2 voir 3 composantes. 70 -> 3 donc plutot 3
+#dimension 1 : tr√®s forte corr entre lineic weight et ca_p_std_per_km -> dans ttes les dims -> surapprentissage
+#dimension 2 : prix de la transaction : les gros clients ach√®tent quasi-toujours
+#dimension 3 : idem 2 mais sur les quantit√©s de materiel achet√©
 
 
 #SVM
@@ -66,7 +66,7 @@ for (i in 1:nrow(donnees.quant4)){
 donnees.quant6 = donnees.quant5[1:50,]
 
 set.seed(1000)
-#donnees.quant6 sont 50 premiËres lignes de donnees.quant
+#donnees.quant6 sont 50 premi√®res lignes de donnees.quant
 intrain <- createDataPartition(y = donnees.quant6[,1], p = 0.7, list = F)
 training = donnees.quant6[intrain,]
 testing = donnees.quant6[-intrain,]
@@ -88,10 +88,22 @@ confusionMatrix(test_pred, testing$accepted)
 
 
 #Question 2
+library("lubridate")
+donnees = read.csv("anon_offer_lines.csv")
 mat.prem = read.table("Brennus_data_avril_2016_matieres_premieres.txt", sep="\t", head = T)
 aluminium = mat.prem[57:84,]
 cuivre = mat.prem[1:56,]
+aluminium$mois = dmy(aluminium$mois)
+cuivre$mois = dmy(cuivre$mois)
+donnees$creation_date = ymd(donnees$creation_date)
+donnees$creation_date = floor_date(donnees$creation_date, unit = "month")
+donnees = donnees[order(donnees$creation_date),]
+
+
+
+
 lims=c()
+dates = donnees[,c("accepted","creation_date","metal")]
 y_dates=dates$creation_date[1]
 for(i in 2:nrow(dates)){
 	if(dates$creation_date[i-1] != dates$creation_date[i]){
@@ -132,7 +144,10 @@ names(cuivre) = c("id_matiere", "id_cours",   "mois",       "cours cuivre")
 names(aluminium) = c("id_matiere", "id_cours",   "mois",       "cours aluminium")
 cuivre[c(1:28),4] = cuivre[c(1:28),4] / max(cuivre[c(1:28),4])
 plot(y_dates[1:28],taux.cu[1:28], ylim = 0:1)
-lines(cuivreLME[,c(3,4)])
-
+lines(cuivre[,c(3,4)])
+x11()
+aluminium[c(1:28),4] = aluminium[c(1:28),4] / max(aluminium[c(1:28),4])
+plot(y_dates[1:28],taux.al[1:28], ylim = 0:1)
+lines(aluminium[,c(3,4)])
 
 
